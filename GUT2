@@ -82,7 +82,7 @@ task.spawn(function()
                 handleFolder(target.folder(), target.partName)
             end
         end
-        task.wait(0.001)
+        task.wait()
     end
 end)
 
@@ -94,7 +94,7 @@ task.spawn(function()
             end)
             if ok and cd then fireclickdetector(cd, 15) end
         end
-        task.wait(0.1)
+        task.wait(0.01)
     end
 end)
 
