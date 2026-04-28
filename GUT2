@@ -1,0 +1,49 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "Galaxy Upgrade Tree 2",
+   Icon = 0,
+   LoadingTitle = "Galaxy Upgrade Tree 2",
+   LoadingSubtitle = "by iizmw",
+   ShowText = "GUT2",
+   Theme = "Default",
+   ToggleUIKeybind = "K",
+   DisableRayfieldPrompts = false,
+   DisableBuildWarnings = false,
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = nil,
+      FileName = "Big Hub"
+   },
+   Discord = {
+      Enabled = false,
+      Invite = "noinvitelink",
+      RememberJoins = true
+   },
+   KeySystem = false,
+   KeySettings = {
+      Title = "Untitled",
+      Subtitle = "Key System",
+      Note = "No method of obtaining the key is provided",
+      FileName = "Key",
+      SaveKey = true,
+      GrabKeyFromSite = false,
+      Key = {"Hello"}
+   }
+})
+
+local Tab = Window:CreateTab("Nihil", 4483362458)
+
+local quantumEnergyLoop = false
+local plasmaLoop = false
+local massLoop = false
+local darkMatterLoop = false
+local starsLoop = false
+local convergentRaysLoop = false
+local corruptedShardsLoop = false
+
+Tab:CreateToggle({ Name = "Auto QuantumEnergy Nihil", CurrentValue = false, Flag = "quantumEnergyNihilToggle", Callback = function(Value) quantumEnergyLoop = Value end }))
+
+local masterGUI = game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("MasterGUI")
+
+task.spawn(function() while true do if quantumEnergyLoop then masterGUI:FireServer("UpdateNihilized", "QuantumEnergy") end task.wait(0.1) end end)
