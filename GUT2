@@ -32,18 +32,110 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
-local Tab = Window:CreateTab("Auto", 4483362458)
+local player = game.Players.LocalPlayer
+local masterGUI = game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("MasterGUI")
+
+-- =============================================
+--  NIHIL TAB
+-- =============================================
+local Auto = Window:CreateTab("Auto", 4483362458)
 
 local quantumEnergyLoop = false
 local plasmaLoop = false
-local massLoop = false
-local darkMatterLoop = false
-local starsLoop = false
-local convergentRaysLoop = false
-local corruptedShardsLoop = false
+local gravitonLoop = false
+local starLoop = false
+local cubeLoop = false
+local currLoop = false
 
-Tab:CreateToggle({ Name = "Quantum Energy Nihil", CurrentValue = false, Flag = "quantumEnergyNihilToggle", Callback = function(Value) quantumEnergyLoop = Value end })
-
-local masterGUI = game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("MasterGUI")
+Auto:CreateToggle({ Name = "Auto QuantumEnergy", CurrentValue = false, Flag = "quantumEnergyToggle", Callback = function(Value) quantumEnergyLoop = Value end })
+Auto:CreateToggle({ Name = "Auto Plasma Collect", CurrentValue = false, Flag = "plasmaToggle", Callback = function(Value) collectPlasmaLoop = Value end })
+Auto:CreateToggle({ Name = "Auto Graviton Collect", CurrentValue = false, Flag = "gravitonToggle", Callback = function(Value) gravitonLoop = Value end })
+Auto:CreateToggle({ Name = "Auto Star Particle Collect", CurrentValue = false, Flag = "starToggle", Callback = function(Value) starLoop = Value end })
+Auto:CreateToggle({ Name = "Auto Cube Click", CurrentValue = false, Flag = "cubeToggle", Callback = function(Value) cubeLoop = Value end })
+Auto:CreateToggle({ Name = "Auto Golden Cube (buggy)", CurrentValue = false, Flag = "currToggle", Callback = function(Value) currLoop = Value end })
 
 task.spawn(function() while true do if quantumEnergyLoop then masterGUI:FireServer("UpdateNihilized", "QuantumEnergy") end task.wait(0.1) end end)
+
+local collectTargets = {
+    { flag = function() return plasmaLoop end, folder = workspace.Plasma and workspace.Plasma.SpawnedPlasma, partName = "Plasma" },
+    { flag = function() return gravitonLoop end, folder = workspace.EventHorizon and workspace.EventHorizon.spawned, partName = "Graviton" },
+    { flag = function() return starLoop end, folder = workspace.StarryGround and workspace.StarryGround.StarParticles, partName = "StarParticle" },
+}
+
+local function handleFolder(folder, partName)
+    if not folder then return end
+    for _, part in ipairs(folder:GetChildren()) do
+        if part.Name == partName and part:IsA("BasePart") then
+            local char = player.Character
+            local root = char and char:FindFirstChild("HumanoidRootPart")
+            if root then
+                pcall(function()
+                    firetouchinterest(part, root, 0)
+                    firetouchinterest(part, root, 1)
+                end)
+            end
+        end
+    end
+end
+
+task.spawn(function()
+    while true do
+        for _, target in ipairs(collectTargets) do
+            if target.flag() and target.folder then
+                handleFolder(target.folder, target.partName)
+            end
+        end
+        task.wait(0.001)
+    end
+end)
+
+task.spawn(function()
+    local cd = workspace.Cube["1 ADHD cube"].ClickDetector
+    while true do
+        if cubeLoop then fireclickdetector(cd, 15) end
+        task.wait(0.1)
+    end
+end)
+
+local function handleCurrPart(part)
+    if not part:IsA("BasePart") then return end
+    local currFolder = workspace.Cube.curr
+    while part and part.Parent == currFolder do
+        pcall(function()
+            part.Velocity = Vector3.new(0, 0, 0)
+            part.RotVelocity = Vector3.new(0, 0, 0)
+            part.CanCollide = false
+            part.CastShadow = false
+            part.Anchored = true
+        end)
+        local currentRoot = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+        if currentRoot then
+            pcall(function()
+                part.CFrame = CFrame.new(currentRoot.Position + Vector3.new(0, 5, 0))
+            end)
+        end
+        task.wait(0.1)
+        local clickDetector = part:FindFirstChild("ClickDetector")
+        if clickDetector then
+            pcall(function() fireclickdetector(clickDetector, 15) end)
+        end
+        task.wait(0.2)
+    end
+end
+
+task.spawn(function()
+    while true do
+        if currLoop then
+            local currFolder = workspace.Cube.curr
+            for _, part in ipairs(currFolder:GetChildren()) do
+                task.spawn(function() handleCurrPart(part) end)
+            end
+            currFolder.ChildAdded:Connect(function(newPart)
+                if currLoop then
+                    task.spawn(function() handleCurrPart(newPart) end)
+                end
+            end)
+        end
+        task.wait(1)
+    end
+end)
