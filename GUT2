@@ -32,7 +32,7 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
-local Tab = Window:CreateTab("Nihil", 4483362458)
+local Tab = Window:CreateTab("Auto", 4483362458)
 
 local quantumEnergyLoop = false
 local plasmaLoop = false
