@@ -102,7 +102,7 @@ local function handleCurrPart(part)
     if not part:IsA("BasePart") then return end
     local ok, currFolder = pcall(function() return workspace.Cube.curr end)
     if not ok or not currFolder then return end
-    while part and part.Parent == currFolder do
+    while currLoop and part and part.Parent == currFolder do
         pcall(function()
             part.Velocity = Vector3.new(0, 0, 0)
             part.RotVelocity = Vector3.new(0, 0, 0)
