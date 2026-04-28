@@ -42,7 +42,7 @@ local starsLoop = false
 local convergentRaysLoop = false
 local corruptedShardsLoop = false
 
-Tab:CreateToggle({ Name = "Auto QuantumEnergy Nihil", CurrentValue = false, Flag = "quantumEnergyNihilToggle", Callback = function(Value) quantumEnergyLoop = Value end })
+Tab:CreateToggle({ Name = "Quantum Energy Nihil", CurrentValue = false, Flag = "quantumEnergyNihilToggle", Callback = function(Value) quantumEnergyLoop = Value end })
 
 local masterGUI = game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("MasterGUI")
 
