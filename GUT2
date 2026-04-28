@@ -82,7 +82,7 @@ task.spawn(function()
                 handleFolder(target.folder(), target.partName)
             end
         end
-        task.wait()
+        task.wait(0.001)
     end
 end)
 
