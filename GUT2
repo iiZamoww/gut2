@@ -44,7 +44,6 @@ local starLoop = false
 local cubeLoop = false
 local currLoop = false
 local cubifyLoop = false
-local cubifyToggleRef = nil
 
 Auto:CreateToggle({ Name = "Auto QuantumEnergy", CurrentValue = false, Flag = "quantumEnergyToggle", Callback = function(Value) quantumEnergyLoop = Value end })
 Auto:CreateToggle({ Name = "Auto Plasma Collect", CurrentValue = false, Flag = "plasmaToggle", Callback = function(Value) plasmaLoop = Value end })
@@ -52,49 +51,11 @@ Auto:CreateToggle({ Name = "Auto Graviton Collect", CurrentValue = false, Flag =
 Auto:CreateToggle({ Name = "Auto Star Particle Collect", CurrentValue = false, Flag = "starToggle", Callback = function(Value) starLoop = Value end })
 Auto:CreateToggle({ Name = "Auto Cube Click", CurrentValue = false, Flag = "cubeToggle", Callback = function(Value) cubeLoop = Value end })
 Auto:CreateToggle({ Name = "Auto Golden Cube (buggy)", CurrentValue = false, Flag = "currToggle", Callback = function(Value) currLoop = Value end })
-
-local cubifyClickCount = 0
-local maxClicks = 19
-
-cubifyToggleRef = Auto:CreateToggle({ 
-    Name = "Auto Cubify Buttons", 
-    CurrentValue = false, 
-    Flag = "cubifyToggle", 
-    Callback = function(Value) 
-        cubifyLoop = Value
-        if not Value then
-            cubifyClickCount = 0
-        end
-    end 
-})
-
--- Check if a Cubify upgrade is bought based on color
-cubifyClickCount = cubifyClickCount + 1
-if cubifyClickCount >= maxClicks then
-    cubifyLoop = false
-    cubifyToggleRef:SetValue(false)
-    print("Auto Cubify turned off after " .. maxClicks .. " clicks")
-end
--- Check if all upgrades are bought
-local function allUpgradesBought()
-    local cubifyFolder = workspace:FindFirstChild("Buttons") and workspace.Buttons:FindFirstChild("Cubify")
-    if not cubifyFolder then return false end
-    
-    for _, model in ipairs(cubifyFolder:GetChildren()) do
-        if model:IsA("Model") and model.Name:match("Cubify%d+") then
-            local mainPart = model:FindFirstChild("MainPart")
-            if mainPart and mainPart:IsA("BasePart") then
-                if not isUpgradeBought(mainPart) then
-                    return false -- Found an unbought upgrade
-                end
-            end
-        end
-    end
-    return true -- All upgrades are bought
-end
+Auto:CreateToggle({ Name = "Auto Cubify Buttons", CurrentValue = false, Flag = "cubifyToggle", Callback = function(Value) cubifyLoop = Value end })
 
 task.spawn(function() while true do if quantumEnergyLoop then masterGUI:FireServer("UpdateNihilized", "QuantumEnergy") end task.wait(0.1) end end)
 
+-- Cubify button clicker
 task.spawn(function()
     while true do
         if cubifyLoop then
@@ -106,8 +67,8 @@ task.spawn(function()
                         if mainPart and mainPart:IsA("BasePart") then
                             local clickDetector = mainPart:FindFirstChild("ClickDetector")
                             if clickDetector then
-                                -- Only click if not already bought
-                                if not isUpgradeBought(mainPart) then
+                                -- check if already maxed by color
+                                if mainPart.Color ~= Color3.fromRGB(27, 26, 5) then
                                     pcall(function()
                                         fireclickdetector(clickDetector, 15)
                                     end)
@@ -115,20 +76,10 @@ task.spawn(function()
                             end
                         end
                     end
-                    task.wait(0.02)
                 end
-            end
-            
-            -- Check if all upgrades are bought
-            if allUpgradesBought() then
-                cubifyLoop = false
-                if cubifyToggleRef then
-                    cubifyToggleRef:SetValue(false)
-                end
-                print("All Cubify upgrades bought! Toggle turned off.")
             end
         end
-        task.wait(0.05)
+        task.wait(0.5)
     end
 end)
 
@@ -198,9 +149,9 @@ local function handleCurrPart(part)
         task.wait(0.1)
         local clickDetector = part:FindFirstChild("ClickDetector")
         if clickDetector then
-            pcall(function() fireclickdetector(clickDetector, 32) end)
+            pcall(function() fireclickdetector(clickDetector, 15) end)
         end
-        task.wait(0.05)
+        task.wait(0.2)
     end
 end
 
