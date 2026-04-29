@@ -44,6 +44,7 @@ local starLoop = false
 local cubeLoop = false
 local currLoop = false
 local cubifyLoop = false
+local cubifyToggleRef = nil -- Store reference to toggle
 
 Auto:CreateToggle({ Name = "Auto QuantumEnergy", CurrentValue = false, Flag = "quantumEnergyToggle", Callback = function(Value) quantumEnergyLoop = Value end })
 Auto:CreateToggle({ Name = "Auto Plasma Collect", CurrentValue = false, Flag = "plasmaToggle", Callback = function(Value) plasmaLoop = Value end })
@@ -51,7 +52,35 @@ Auto:CreateToggle({ Name = "Auto Graviton Collect", CurrentValue = false, Flag =
 Auto:CreateToggle({ Name = "Auto Star Particle Collect", CurrentValue = false, Flag = "starToggle", Callback = function(Value) starLoop = Value end })
 Auto:CreateToggle({ Name = "Auto Cube Click", CurrentValue = false, Flag = "cubeToggle", Callback = function(Value) cubeLoop = Value end })
 Auto:CreateToggle({ Name = "Auto Golden Cube (buggy)", CurrentValue = false, Flag = "currToggle", Callback = function(Value) currLoop = Value end })
-Auto:CreateToggle({ Name = "Auto Cubify Buttons", CurrentValue = false, Flag = "cubifyToggle", Callback = function(Value) cubifyLoop = Value end })
+
+-- Create Cubify toggle with reference
+cubifyToggleRef = Auto:CreateToggle({ 
+    Name = "Auto Cubify Buttons", 
+    CurrentValue = false, 
+    Flag = "cubifyToggle", 
+    Callback = function(Value) 
+        cubifyLoop = Value 
+    end 
+})
+
+-- Function to check if all Cubify buttons are bought (invisible/disabled)
+local function allCubifyUpgradesBought()
+    local cubifyFolder = workspace:FindFirstChild("Buttons") and workspace.Buttons:FindFirstChild("Cubify")
+    if not cubifyFolder then return false end
+    
+    for _, model in ipairs(cubifyFolder:GetChildren()) do
+        if model:IsA("Model") and model.Name:match("Cubify%d+") then
+            local mainPart = model:FindFirstChild("MainPart")
+            if mainPart and mainPart:IsA("BasePart") then
+                -- Check if button is still visible/clickable
+                if mainPart.Transparency < 0.9 or (mainPart:FindFirstChild("ClickDetector") and mainPart:FindFirstChild("ClickDetector").Enabled ~= false) then
+                    return false -- Found an upgrade that's still available
+                end
+            end
+        end
+    end
+    return true -- All upgrades appear to be bought
+end
 
 task.spawn(function() while true do if quantumEnergyLoop then masterGUI:FireServer("UpdateNihilized", "QuantumEnergy") end task.wait(0.1) end end)
 
@@ -73,6 +102,14 @@ task.spawn(function()
                         end
                     end
                 end
+            end
+            
+            if allCubifyUpgradesBought() then
+                cubifyLoop = false
+                if cubifyToggleRef then
+                    cubifyToggleRef:SetValue(false)
+                end
+                print("All Cubify upgrades bought! Toggle turned off.")
             end
         end
         task.wait(0.02)
