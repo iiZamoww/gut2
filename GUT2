@@ -55,7 +55,6 @@ Auto:CreateToggle({ Name = "Auto Cubify Buttons", CurrentValue = false, Flag = "
 
 task.spawn(function() while true do if quantumEnergyLoop then masterGUI:FireServer("UpdateNihilized", "QuantumEnergy") end task.wait(0.1) end end)
 
--- Cubify button clicker
 task.spawn(function()
     while true do
         if cubifyLoop then
@@ -69,7 +68,6 @@ task.spawn(function()
                             if clickDetector then
                                 pcall(function()
                                     fireclickdetector(clickDetector, 15)
-                                    print("Clicked:", model.Name)
                                 end)
                             end
                         end
@@ -77,7 +75,7 @@ task.spawn(function()
                 end
             end
         end
-        task.wait(0.5)
+        task.wait(0.02)
     end
 end)
 
