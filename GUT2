@@ -43,6 +43,7 @@ local gravitonLoop = false
 local starLoop = false
 local cubeLoop = false
 local currLoop = false
+local cubifyLoop = false
 
 Auto:CreateToggle({ Name = "Auto QuantumEnergy", CurrentValue = false, Flag = "quantumEnergyToggle", Callback = function(Value) quantumEnergyLoop = Value end })
 Auto:CreateToggle({ Name = "Auto Plasma Collect", CurrentValue = false, Flag = "plasmaToggle", Callback = function(Value) plasmaLoop = Value end })
@@ -50,8 +51,35 @@ Auto:CreateToggle({ Name = "Auto Graviton Collect", CurrentValue = false, Flag =
 Auto:CreateToggle({ Name = "Auto Star Particle Collect", CurrentValue = false, Flag = "starToggle", Callback = function(Value) starLoop = Value end })
 Auto:CreateToggle({ Name = "Auto Cube Click", CurrentValue = false, Flag = "cubeToggle", Callback = function(Value) cubeLoop = Value end })
 Auto:CreateToggle({ Name = "Auto Golden Cube (buggy)", CurrentValue = false, Flag = "currToggle", Callback = function(Value) currLoop = Value end })
+Auto:CreateToggle({ Name = "Auto Cubify Buttons", CurrentValue = false, Flag = "cubifyToggle", Callback = function(Value) cubifyLoop = Value end })
 
 task.spawn(function() while true do if quantumEnergyLoop then masterGUI:FireServer("UpdateNihilized", "QuantumEnergy") end task.wait(0.1) end end)
+
+-- Cubify button clicker
+task.spawn(function()
+    while true do
+        if cubifyLoop then
+            local cubifyFolder = workspace:FindFirstChild("Buttons") and workspace.Buttons:FindFirstChild("Cubify")
+            if cubifyFolder then
+                for _, model in ipairs(cubifyFolder:GetChildren()) do
+                    if model:IsA("Model") and model.Name:match("Cubify%d+") then
+                        local mainPart = model:FindFirstChild("MainPart")
+                        if mainPart and mainPart:IsA("BasePart") then
+                            local clickDetector = mainPart:FindFirstChild("ClickDetector")
+                            if clickDetector then
+                                pcall(function()
+                                    fireclickdetector(clickDetector, 15)
+                                    print("Clicked:", model.Name)
+                                end)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        task.wait(0.5)
+    end
+end)
 
 local collectTargets = {
     { flag = function() return plasmaLoop end, folder = function() return workspace:FindFirstChild("Plasma") and workspace.Plasma:FindFirstChild("SpawnedPlasma") end, partName = "Plasma" },
@@ -119,9 +147,9 @@ local function handleCurrPart(part)
         task.wait(0.1)
         local clickDetector = part:FindFirstChild("ClickDetector")
         if clickDetector then
-            pcall(function() fireclickdetector(clickDetector, 15) end)
+            pcall(function() fireclickdetector(clickDetector, 32) end)
         end
-        task.wait(0.2)
+        task.wait(0.05)
     end
 end
 
