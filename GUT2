@@ -44,7 +44,8 @@ local starLoop = false
 local cubeLoop = false
 local currLoop = false
 local cubifyLoop = false
-local cubifyToggleRef = nil -- Store reference to toggle
+local cubifyToggleRef = nil
+local highestCubifyNumber = 0
 
 Auto:CreateToggle({ Name = "Auto QuantumEnergy", CurrentValue = false, Flag = "quantumEnergyToggle", Callback = function(Value) quantumEnergyLoop = Value end })
 Auto:CreateToggle({ Name = "Auto Plasma Collect", CurrentValue = false, Flag = "plasmaToggle", Callback = function(Value) plasmaLoop = Value end })
@@ -53,33 +54,40 @@ Auto:CreateToggle({ Name = "Auto Star Particle Collect", CurrentValue = false, F
 Auto:CreateToggle({ Name = "Auto Cube Click", CurrentValue = false, Flag = "cubeToggle", Callback = function(Value) cubeLoop = Value end })
 Auto:CreateToggle({ Name = "Auto Golden Cube (buggy)", CurrentValue = false, Flag = "currToggle", Callback = function(Value) currLoop = Value end })
 
--- Create Cubify toggle with reference
 cubifyToggleRef = Auto:CreateToggle({ 
     Name = "Auto Cubify Buttons", 
     CurrentValue = false, 
     Flag = "cubifyToggle", 
     Callback = function(Value) 
-        cubifyLoop = Value 
+        cubifyLoop = Value
+        if not Value then
+            -- Reset tracking when toggled off
+            highestCubifyNumber = 0
+        end
     end 
 })
 
--- Function to check if all Cubify buttons are bought (invisible/disabled)
-local function allCubifyUpgradesBought()
+-- Get the number from CubifyX name
+local function getCubifyNumber(modelName)
+    local num = modelName:match("Cubify(%d+)")
+    return num and tonumber(num) or 0
+end
+
+-- Get the highest existing Cubify number
+local function getHighestExistingCubifyNumber()
+    local highest = 0
     local cubifyFolder = workspace:FindFirstChild("Buttons") and workspace.Buttons:FindFirstChild("Cubify")
-    if not cubifyFolder then return false end
-    
-    for _, model in ipairs(cubifyFolder:GetChildren()) do
-        if model:IsA("Model") and model.Name:match("Cubify%d+") then
-            local mainPart = model:FindFirstChild("MainPart")
-            if mainPart and mainPart:IsA("BasePart") then
-                -- Check if button is still visible/clickable
-                if mainPart.Transparency < 0.9 or (mainPart:FindFirstChild("ClickDetector") and mainPart:FindFirstChild("ClickDetector").Enabled ~= false) then
-                    return false -- Found an upgrade that's still available
+    if cubifyFolder then
+        for _, model in ipairs(cubifyFolder:GetChildren()) do
+            if model:IsA("Model") and model.Name:match("Cubify%d+") then
+                local num = getCubifyNumber(model.Name)
+                if num > highest then
+                    highest = num
                 end
             end
         end
     end
-    return true -- All upgrades appear to be bought
+    return highest
 end
 
 task.spawn(function() while true do if quantumEnergyLoop then masterGUI:FireServer("UpdateNihilized", "QuantumEnergy") end task.wait(0.1) end end)
@@ -89,6 +97,17 @@ task.spawn(function()
         if cubifyLoop then
             local cubifyFolder = workspace:FindFirstChild("Buttons") and workspace.Buttons:FindFirstChild("Cubify")
             if cubifyFolder then
+                local totalUpgrades = 0
+                local clickedThisCycle = 0
+                
+                -- First pass: count total upgrades
+                for _, model in ipairs(cubifyFolder:GetChildren()) do
+                    if model:IsA("Model") and model.Name:match("Cubify%d+") then
+                        totalUpgrades = totalUpgrades + 1
+                    end
+                end
+                
+                -- Second pass: click upgrades
                 for _, model in ipairs(cubifyFolder:GetChildren()) do
                     if model:IsA("Model") and model.Name:match("Cubify%d+") then
                         local mainPart = model:FindFirstChild("MainPart")
@@ -97,22 +116,32 @@ task.spawn(function()
                             if clickDetector then
                                 pcall(function()
                                     fireclickdetector(clickDetector, 15)
+                                    local currentNum = getCubifyNumber(model.Name)
+                                    if currentNum > highestCubifyNumber then
+                                        highestCubifyNumber = currentNum
+                                        print("New highest Cubify:", highestCubifyNumber)
+                                    end
+                                    clickedThisCycle = clickedThisCycle + 1
                                 end)
                             end
                         end
                     end
+                    task.wait(0.02)
                 end
-            end
-            
-            if allCubifyUpgradesBought() then
-                cubifyLoop = false
-                if cubifyToggleRef then
-                    cubifyToggleRef:SetValue(false)
+                
+                -- Check if we've clicked all upgrades and reached the highest one
+                local highestExisting = getHighestExistingCubifyNumber()
+                
+                if clickedThisCycle >= totalUpgrades and highestCubifyNumber >= highestExisting then
+                    cubifyLoop = false
+                    if cubifyToggleRef then
+                        cubifyToggleRef:SetValue(false)
+                    end
+                    print("All Cubify upgrades bought! Toggle turned off.")
                 end
-                print("All Cubify upgrades bought! Toggle turned off.")
             end
         end
-        task.wait(0.02)
+        task.wait(0.05)
     end
 end)
 
