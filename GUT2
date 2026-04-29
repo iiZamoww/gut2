@@ -53,26 +53,28 @@ Auto:CreateToggle({ Name = "Auto Star Particle Collect", CurrentValue = false, F
 Auto:CreateToggle({ Name = "Auto Cube Click", CurrentValue = false, Flag = "cubeToggle", Callback = function(Value) cubeLoop = Value end })
 Auto:CreateToggle({ Name = "Auto Golden Cube (buggy)", CurrentValue = false, Flag = "currToggle", Callback = function(Value) currLoop = Value end })
 
+local cubifyClickCount = 0
+local maxClicks = 19
+
 cubifyToggleRef = Auto:CreateToggle({ 
     Name = "Auto Cubify Buttons", 
     CurrentValue = false, 
     Flag = "cubifyToggle", 
     Callback = function(Value) 
-        cubifyLoop = Value 
+        cubifyLoop = Value
+        if not Value then
+            cubifyClickCount = 0
+        end
     end 
 })
 
 -- Check if a Cubify upgrade is bought based on color
-local function isUpgradeBought(mainPart)
-    if not mainPart or not mainPart:IsA("BasePart") then return false end
-    local color = mainPart.Color
-    -- Bought color: 27, 26, 5
-    if color.R == 27/255 and color.G == 26/255 and color.B == 5/255 then
-        return true
-    end
-    return false
+cubifyClickCount = cubifyClickCount + 1
+if cubifyClickCount >= maxClicks then
+    cubifyLoop = false
+    cubifyToggleRef:SetValue(false)
+    print("Auto Cubify turned off after " .. maxClicks .. " clicks")
 end
-
 -- Check if all upgrades are bought
 local function allUpgradesBought()
     local cubifyFolder = workspace:FindFirstChild("Buttons") and workspace.Buttons:FindFirstChild("Cubify")
