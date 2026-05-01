@@ -55,7 +55,6 @@ Auto:CreateToggle({ Name = "Auto Cubify Buttons", CurrentValue = false, Flag = "
 
 task.spawn(function() while true do if quantumEnergyLoop then masterGUI:FireServer("UpdateNihilized", "QuantumEnergy") end task.wait(0.1) end end)
 
--- Cubify button clicker
 task.spawn(function()
     while true do
         if cubifyLoop then
@@ -133,25 +132,11 @@ local function handleCurrPart(part)
     local ok, currFolder = pcall(function() return workspace.Cube.curr end)
     if not ok or not currFolder then return end
     while currLoop and part and part.Parent == currFolder do
-        pcall(function()
-            part.Velocity = Vector3.new(0, 0, 0)
-            part.RotVelocity = Vector3.new(0, 0, 0)
-            part.CanCollide = false
-            part.CastShadow = false
-            part.Anchored = true
-        end)
-        local currentRoot = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-        if currentRoot then
-            pcall(function()
-                part.CFrame = CFrame.new(currentRoot.Position + Vector3.new(0, 5, 0))
-            end)
-        end
-        task.wait(0.1)
         local clickDetector = part:FindFirstChild("ClickDetector")
         if clickDetector then
             pcall(function() fireclickdetector(clickDetector, 15) end)
         end
-        task.wait(0.2)
+        task.wait(0.1)
     end
 end
 
