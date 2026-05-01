@@ -149,14 +149,20 @@ task.spawn(function()
         if currLoop then
             local ok, currFolder = pcall(function() return workspace.Cube.curr end)
             if ok and currFolder then
-                for _, part in ipairs(currFolder:GetChildren()) do
-                    task.spawn(function() handleCurrPart(part) end)
+                local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                if root then
+                    for _, part in ipairs(currFolder:GetChildren()) do
+                        if part:IsA("BasePart") and (part.Position - root.Position).Magnitude <= 20 then
+                            local clickDetector = part:FindFirstChild("ClickDetector")
+                            if clickDetector then
+                                pcall(function() fireclickdetector(clickDetector, 15) end)
+                            end
+                        end
+                    end
                 end
                 if not currConnection then
                     currConnection = currFolder.ChildAdded:Connect(function(newPart)
-                        if currLoop then
-                            task.spawn(function() handleCurrPart(newPart) end)
-                        end
+                        -- new parts handled by the main loop automatically
                     end)
                 end
             end
@@ -166,6 +172,6 @@ task.spawn(function()
                 currConnection = nil
             end
         end
-        task.wait(1)
+        task.wait(0.1)
     end
 end)
