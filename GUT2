@@ -134,15 +134,18 @@ local currParts = {
     "workspace.dcube", -- diamond cubes
 }
 
+local currParts = {
+    "workspace.Cube.curr", -- golden cubes (folder with children)
+    "workspace.dcube",     -- diamond cube (single part with ClickDetector)
+}
+
 task.spawn(function()
     while true do
         if currLoop then
             local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
             if root then
                 for _, path in ipairs(currParts) do
-                    local ok, folder = pcall(function() return game:GetService("Selection") end)
-                    -- resolve the path
-                    local ok2, folder2 = pcall(function()
+                    local ok, obj = pcall(function()
                         local result = workspace
                         for part in path:gmatch("[^%.]+") do
                             if part ~= "workspace" then
@@ -151,20 +154,29 @@ task.spawn(function()
                         end
                         return result
                     end)
-                    if ok2 and folder2 then
-                        for _, part in ipairs(folder2:GetChildren()) do
+                    if ok and obj then
+                        local function tryClick(part)
                             if part:IsA("BasePart") and (part.Position - root.Position).Magnitude <= 20 then
                                 local cd = part:FindFirstChild("ClickDetector")
                                 if cd then
                                     pcall(function() fireclickdetector(cd, 15) end)
-                                    break
+                                    return true
                                 end
+                            end
+                            return false
+                        end
+
+                        -- try the object itself first
+                        if not tryClick(obj) then
+                            -- if that fails, try its children
+                            for _, part in ipairs(obj:GetChildren()) do
+                                if tryClick(part) then break end
                             end
                         end
                     end
                 end
             end
         end
-        task.wait(0.01)
+        task.wait(0.001)
     end
 end)
