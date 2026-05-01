@@ -127,7 +127,7 @@ task.spawn(function()
     end
 end)
 
-local MAX_PER_CYCLE = 5
+local MAX_PER_CYCLE = 1
 
 task.spawn(function()
     while true do
