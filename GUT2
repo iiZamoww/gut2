@@ -145,7 +145,7 @@ task.spawn(function()
                             if part:IsA("BasePart") then
                                 local cd = part:FindFirstChild("ClickDetector")
                                 if cd then
-                                    pcall(function() fireclickdetector(cd, 15) end)
+                                    pcall(function() fireclickdetector(cd, 32) end)
                                     break
                                 end
                             end
@@ -154,7 +154,7 @@ task.spawn(function()
                         if obj:IsA("BasePart") then
                             local cd = obj:FindFirstChild("ClickDetector")
                             if cd then
-                                pcall(function() fireclickdetector(cd, 15) end)
+                                pcall(function() fireclickdetector(cd, 32) end)
                             end
                         end
                     end
