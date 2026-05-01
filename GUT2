@@ -130,42 +130,31 @@ end)
 local MAX_PER_CYCLE = 1
 
 local currParts = {
-    { path = "workspace.Cube.curr", isFolder = true },  -- folder with clickable children
-    { path = "workspace.dcube", isFolder = false },      -- single part with ClickDetector
+    { obj = function() return workspace.Cube.curr end, isFolder = true },
+    { obj = function() return workspace.dcube end, isFolder = false },
 }
 
 task.spawn(function()
     while true do
         if currLoop then
-            local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-            if root then
-                for _, target in ipairs(currParts) do
-                    local ok, obj = pcall(function()
-                        local result = workspace
-                        for part in target.path:gmatch("[^%.]+") do
-                            if part ~= "workspace" then
-                                result = result[part]
-                            end
-                        end
-                        return result
-                    end)
-                    if ok and obj then
-                        if target.isFolder then
-                            for _, part in ipairs(obj:GetChildren()) do
-                                if part:IsA("BasePart") and (part.Position - root.Position).Magnitude <= 20 then
-                                    local cd = part:FindFirstChild("ClickDetector")
-                                    if cd then
-                                        pcall(function() fireclickdetector(cd, 15) end)
-                                        break
-                                    end
-                                end
-                            end
-                        else
-                            if obj:IsA("BasePart") and (obj.Position - root.Position).Magnitude <= 20 then
-                                local cd = obj:FindFirstChild("ClickDetector")
+            for _, target in ipairs(currParts) do
+                local ok, obj = pcall(target.obj)
+                if ok and obj then
+                    if target.isFolder then
+                        for _, part in ipairs(obj:GetChildren()) do
+                            if part:IsA("BasePart") then
+                                local cd = part:FindFirstChild("ClickDetector")
                                 if cd then
                                     pcall(function() fireclickdetector(cd, 15) end)
+                                    break
                                 end
+                            end
+                        end
+                    else
+                        if obj:IsA("BasePart") then
+                            local cd = obj:FindFirstChild("ClickDetector")
+                            if cd then
+                                pcall(function() fireclickdetector(cd, 15) end)
                             end
                         end
                     end
