@@ -121,9 +121,9 @@ task.spawn(function()
             local ok, cd = pcall(function()
                 return workspace.Cube["1 ADHD cube"].ClickDetector
             end)
-            if ok and cd then fireclickdetector(cd, 15) end
+            if ok and cd then fireclickdetector(cd, 32) end
         end
-        task.wait(0.01)
+        task.wait(0.001)
     end
 end)
 
