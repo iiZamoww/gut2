@@ -127,23 +127,8 @@ task.spawn(function()
     end
 end)
 
-local function handleCurrPart(part)
-    if not part:IsA("BasePart") then return end
-    local ok, currFolder = pcall(function() return workspace.Cube.curr end)
-    if not ok or not currFolder then return end
-    while currLoop and part and part.Parent == currFolder do
-        local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-        if root and (part.Position - root.Position).Magnitude <= 20 then
-            local clickDetector = part:FindFirstChild("ClickDetector")
-            if clickDetector then
-                pcall(function() fireclickdetector(clickDetector, 15) end)
-            end
-        end
-        task.wait(0.1)
-    end
-end
+local MAX_PER_CYCLE = 5
 
-local currConnection = nil
 task.spawn(function()
     while true do
         if currLoop then
@@ -151,25 +136,19 @@ task.spawn(function()
             if ok and currFolder then
                 local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
                 if root then
+                    local clicked = 0
                     for _, part in ipairs(currFolder:GetChildren()) do
+                        if clicked >= MAX_PER_CYCLE then break end
                         if part:IsA("BasePart") and (part.Position - root.Position).Magnitude <= 20 then
                             local clickDetector = part:FindFirstChild("ClickDetector")
                             if clickDetector then
                                 pcall(function() fireclickdetector(clickDetector, 15) end)
+                                clicked += 1
+                                task.wait(0.05)
                             end
                         end
                     end
                 end
-                if not currConnection then
-                    currConnection = currFolder.ChildAdded:Connect(function(newPart)
-                        -- new parts handled by the main loop automatically
-                    end)
-                end
-            end
-        else
-            if currConnection then
-                currConnection:Disconnect()
-                currConnection = nil
             end
         end
         task.wait(0.1)
