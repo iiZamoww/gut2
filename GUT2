@@ -50,7 +50,7 @@ Auto:CreateToggle({ Name = "Auto Plasma Collect", CurrentValue = false, Flag = "
 Auto:CreateToggle({ Name = "Auto Graviton Collect", CurrentValue = false, Flag = "gravitonToggle", Callback = function(Value) gravitonLoop = Value end })
 Auto:CreateToggle({ Name = "Auto Star Particle Collect", CurrentValue = false, Flag = "starToggle", Callback = function(Value) starLoop = Value end })
 Auto:CreateToggle({ Name = "Auto Cube Click", CurrentValue = false, Flag = "cubeToggle", Callback = function(Value) cubeLoop = Value end })
-Auto:CreateToggle({ Name = "Auto Golden Cube (buggy)", CurrentValue = false, Flag = "currToggle", Callback = function(Value) currLoop = Value end })
+Auto:CreateToggle({ Name = "Auto Collect Cubes", CurrentValue = false, Flag = "currToggle", Callback = function(Value) currLoop = Value end })
 Auto:CreateToggle({ Name = "Auto Cubify Buttons", CurrentValue = false, Flag = "cubifyToggle", Callback = function(Value) cubifyLoop = Value end })
 
 task.spawn(function() while true do if quantumEnergyLoop then masterGUI:FireServer("UpdateNihilized", "QuantumEnergy") end task.wait(0.1) end end)
