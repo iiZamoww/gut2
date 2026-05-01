@@ -140,6 +140,7 @@ local function handleCurrPart(part)
     end
 end
 
+local currConnection = nil
 task.spawn(function()
     while true do
         if currLoop then
@@ -148,11 +149,18 @@ task.spawn(function()
                 for _, part in ipairs(currFolder:GetChildren()) do
                     task.spawn(function() handleCurrPart(part) end)
                 end
-                currFolder.ChildAdded:Connect(function(newPart)
-                    if currLoop then
-                        task.spawn(function() handleCurrPart(newPart) end)
-                    end
-                end)
+                if not currConnection then
+                    currConnection = currFolder.ChildAdded:Connect(function(newPart)
+                        if currLoop then
+                            task.spawn(function() handleCurrPart(newPart) end)
+                        end
+                    end)
+                end
+            end
+        else
+            if currConnection then
+                currConnection:Disconnect()
+                currConnection = nil
             end
         end
         task.wait(1)
