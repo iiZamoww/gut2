@@ -130,11 +130,6 @@ end)
 local MAX_PER_CYCLE = 1
 
 local currParts = {
-    "workspace.Cube.curr", -- golden cubes
-    "workspace.dcube", -- diamond cubes
-}
-
-local currParts = {
     { path = "workspace.Cube.curr", isFolder = true },  -- folder with clickable children
     { path = "workspace.dcube", isFolder = false },      -- single part with ClickDetector
 }
