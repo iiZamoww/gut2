@@ -118,11 +118,10 @@ end)
 task.spawn(function()
     while true do
         if cubeLoop then
-            print("loop active")
             local ok, cd = pcall(function()
                 return workspace.Cube["1 ADHD cube"].ClickDetector
             end)
-            if ok and cd then fireclickdetector(cd, 32)
+            if ok and cd then fireclickdetector(cd, 25)
             print("this works") end
         end
         task.wait(0.001)
