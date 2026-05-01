@@ -127,7 +127,6 @@ task.spawn(function()
      end
  end)
 
-local MAX_PER_CYCLE = 1
 local currParts = {
     { obj = function() return workspace.Cube.curr end, isFolder = true },
     { obj = function() return workspace.dcube end, isFolder = false },
@@ -135,7 +134,8 @@ local currParts = {
 
 local cachedChildren = {}
 local lastRefresh = 0
-local REFRESH_RATE = 20 -- refresh children list every 2 seconds
+local currentIndex = 1
+local REFRESH_RATE = 20
 
 task.spawn(function()
     while true do
@@ -150,28 +150,37 @@ task.spawn(function()
                             for _, part in ipairs(obj:GetChildren()) do
                                 if part:IsA("BasePart") then
                                     local cd = part:FindFirstChild("ClickDetector")
-                                    if cd then
-                                        table.insert(cachedChildren, cd)
-                                    end
+                                    if cd then table.insert(cachedChildren, cd) end
                                 end
                             end
                         else
                             if obj:IsA("BasePart") then
                                 local cd = obj:FindFirstChild("ClickDetector")
-                                if cd then
-                                    table.insert(cachedChildren, cd)
-                                end
+                                if cd then table.insert(cachedChildren, cd) end
                             end
                         end
                     end
                 end
                 lastRefresh = now
+                currentIndex = 1
             end
 
             if #cachedChildren > 0 then
-                local cd = cachedChildren[1]
-                if cd and cd.Parent then
-                    pcall(function() fireclickdetector(cd, 15) end)
+                local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                if root then
+                    -- find next nearby one starting from currentIndex
+                    for i = 0, #cachedChildren - 1 do
+                        local idx = (currentIndex + i - 1) % #cachedChildren + 1
+                        local cd = cachedChildren[idx]
+                        if cd and cd.Parent then
+                            local part = cd.Parent
+                            if part:IsA("BasePart") and (part.Position - root.Position).Magnitude <= 30 then
+                                pcall(function() fireclickdetector(cd, 15) end)
+                                currentIndex = idx % #cachedChildren + 1
+                                break
+                            end
+                        end
+                    end
                 end
             end
         end
