@@ -129,22 +129,36 @@ end)
 
 local MAX_PER_CYCLE = 1
 
+local currParts = {
+    "workspace.Cube.curr", -- golden cubes
+    "workspace.dcube", -- diamond cubes
+}
+
 task.spawn(function()
     while true do
         if currLoop then
-            local ok, currFolder = pcall(function() return workspace.Cube.curr end)
-            if ok and currFolder then
-                local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                if root then
-                    local clicked = 0
-                    for _, part in ipairs(currFolder:GetChildren()) do
-                        if clicked >= MAX_PER_CYCLE then break end
-                        if part:IsA("BasePart") and (part.Position - root.Position).Magnitude <= 20 then
-                            local clickDetector = part:FindFirstChild("ClickDetector")
-                            if clickDetector then
-                                pcall(function() fireclickdetector(clickDetector, 15) end)
-                                clicked += 1
-                                task.wait(0.01)
+            local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+            if root then
+                for _, path in ipairs(currParts) do
+                    local ok, folder = pcall(function() return game:GetService("Selection") end)
+                    -- resolve the path
+                    local ok2, folder2 = pcall(function()
+                        local result = workspace
+                        for part in path:gmatch("[^%.]+") do
+                            if part ~= "workspace" then
+                                result = result[part]
+                            end
+                        end
+                        return result
+                    end)
+                    if ok2 and folder2 then
+                        for _, part in ipairs(folder2:GetChildren()) do
+                            if part:IsA("BasePart") and (part.Position - root.Position).Magnitude <= 20 then
+                                local cd = part:FindFirstChild("ClickDetector")
+                                if cd then
+                                    pcall(function() fireclickdetector(cd, 15) end)
+                                    break
+                                end
                             end
                         end
                     end
