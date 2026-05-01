@@ -135,8 +135,8 @@ local currParts = {
 }
 
 local currParts = {
-    "workspace.Cube.curr", -- golden cubes (folder with children)
-    "workspace.dcube",     -- diamond cube (single part with ClickDetector)
+    { path = "workspace.Cube.curr", isFolder = true },  -- folder with clickable children
+    { path = "workspace.dcube", isFolder = false },      -- single part with ClickDetector
 }
 
 task.spawn(function()
@@ -144,10 +144,10 @@ task.spawn(function()
         if currLoop then
             local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
             if root then
-                for _, path in ipairs(currParts) do
+                for _, target in ipairs(currParts) do
                     local ok, obj = pcall(function()
                         local result = workspace
-                        for part in path:gmatch("[^%.]+") do
+                        for part in target.path:gmatch("[^%.]+") do
                             if part ~= "workspace" then
                                 result = result[part]
                             end
@@ -155,22 +155,22 @@ task.spawn(function()
                         return result
                     end)
                     if ok and obj then
-                        local function tryClick(part)
-                            if part:IsA("BasePart") and (part.Position - root.Position).Magnitude <= 20 then
-                                local cd = part:FindFirstChild("ClickDetector")
-                                if cd then
-                                    pcall(function() fireclickdetector(cd, 15) end)
-                                    return true
+                        if target.isFolder then
+                            for _, part in ipairs(obj:GetChildren()) do
+                                if part:IsA("BasePart") and (part.Position - root.Position).Magnitude <= 20 then
+                                    local cd = part:FindFirstChild("ClickDetector")
+                                    if cd then
+                                        pcall(function() fireclickdetector(cd, 15) end)
+                                        break
+                                    end
                                 end
                             end
-                            return false
-                        end
-
-                        -- try the object itself first
-                        if not tryClick(obj) then
-                            -- if that fails, try its children
-                            for _, part in ipairs(obj:GetChildren()) do
-                                if tryClick(part) then break end
+                        else
+                            if obj:IsA("BasePart") and (obj.Position - root.Position).Magnitude <= 20 then
+                                local cd = obj:FindFirstChild("ClickDetector")
+                                if cd then
+                                    pcall(function() fireclickdetector(cd, 15) end)
+                                end
                             end
                         end
                     end
