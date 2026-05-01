@@ -132,9 +132,12 @@ local function handleCurrPart(part)
     local ok, currFolder = pcall(function() return workspace.Cube.curr end)
     if not ok or not currFolder then return end
     while currLoop and part and part.Parent == currFolder do
-        local clickDetector = part:FindFirstChild("ClickDetector")
-        if clickDetector then
-            pcall(function() fireclickdetector(clickDetector, 15) end)
+        local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+        if root and (part.Position - root.Position).Magnitude <= 20 then
+            local clickDetector = part:FindFirstChild("ClickDetector")
+            if clickDetector then
+                pcall(function() fireclickdetector(clickDetector, 15) end)
+            end
         end
         task.wait(0.1)
     end
