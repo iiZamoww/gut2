@@ -128,39 +128,53 @@ task.spawn(function()
  end)
 
 local MAX_PER_CYCLE = 1
-
 local currParts = {
     { obj = function() return workspace.Cube.curr end, isFolder = true },
     { obj = function() return workspace.dcube end, isFolder = false },
 }
 
+local cachedChildren = {}
+local lastRefresh = 0
+local REFRESH_RATE = 5 -- refresh children list every 2 seconds
+
 task.spawn(function()
     while true do
         if currLoop then
-            for _, target in ipairs(currParts) do
-                local ok, obj = pcall(target.obj)
-                if ok and obj then
-                    if target.isFolder then
-                        for _, part in ipairs(obj:GetChildren()) do
-                            if part:IsA("BasePart") then
-                                local cd = part:FindFirstChild("ClickDetector")
-                                if cd then
-                                    pcall(function() fireclickdetector(cd, 15) end)
-                                    break
+            local now = tick()
+            if now - lastRefresh >= REFRESH_RATE then
+                cachedChildren = {}
+                for _, target in ipairs(currParts) do
+                    local ok, obj = pcall(target.obj)
+                    if ok and obj then
+                        if target.isFolder then
+                            for _, part in ipairs(obj:GetChildren()) do
+                                if part:IsA("BasePart") then
+                                    local cd = part:FindFirstChild("ClickDetector")
+                                    if cd then
+                                        table.insert(cachedChildren, cd)
+                                    end
                                 end
                             end
-                        end
-                    else
-                        if obj:IsA("BasePart") then
-                            local cd = obj:FindFirstChild("ClickDetector")
-                            if cd then
-                                pcall(function() fireclickdetector(cd, 15) end)
+                        else
+                            if obj:IsA("BasePart") then
+                                local cd = obj:FindFirstChild("ClickDetector")
+                                if cd then
+                                    table.insert(cachedChildren, cd)
+                                end
                             end
                         end
                     end
                 end
+                lastRefresh = now
+            end
+
+            if #cachedChildren > 0 then
+                local cd = cachedChildren[1]
+                if cd and cd.Parent then
+                    pcall(function() fireclickdetector(cd, 15) end)
+                end
             end
         end
-        task.wait(0.1)
+        task.wait(0.01)
     end
 end)
