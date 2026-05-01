@@ -116,26 +116,17 @@ task.spawn(function()
 end)
 
 task.spawn(function()
-   while true do
-      if cubeLoop then
-         local cd = workspace.Cube["1 ADHD cube"].ClickDetector
-         fireclickdetector(cd, 32)
-         print('fired')
-      end
-   task.wait(0.001)
-end)
--- task.spawn(function()
---     while true do
---         if cubeLoop then
---             local ok, cd = pcall(function()
---                 return workspace.Cube["1 ADHD cube"].ClickDetector
---             end)
---             if ok and cd then fireclickdetector(cd, 25)
---             print("this works") end
---         end
---         task.wait(0.001)
---     end
--- end)
+     while true do
+         if cubeLoop then
+             local ok, cd = pcall(function()
+                 return workspace.Cube["1 ADHD cube"].ClickDetector
+             end)
+             if ok and cd then fireclickdetector(cd, 20)
+             print("this works") end
+         end
+         task.wait(0.001)
+     end
+ end)
 
 local MAX_PER_CYCLE = 1
 
@@ -155,7 +146,7 @@ task.spawn(function()
                             if part:IsA("BasePart") then
                                 local cd = part:FindFirstChild("ClickDetector")
                                 if cd then
-                                    pcall(function() fireclickdetector(cd, 15) end)
+                                    pcall(function() fireclickdetector(cd, 20) end)
                                     break
                                 end
                             end
@@ -164,7 +155,7 @@ task.spawn(function()
                         if obj:IsA("BasePart") then
                             local cd = obj:FindFirstChild("ClickDetector")
                             if cd then
-                                pcall(function() fireclickdetector(cd, 15) end)
+                                pcall(function() fireclickdetector(cd, 20) end)
                             end
                         end
                     end
