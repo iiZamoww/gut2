@@ -137,20 +137,6 @@ local currParts = {
 task.spawn(function()
     while true do
         if currLoop then
-            -- remove collision with all parts
-            for _, target in ipairs(currParts) do
-                local ok, obj = pcall(target.obj)
-                if ok and obj then
-                    local parts = target.isFolder and obj:GetChildren() or {obj}
-                    for _, part in ipairs(parts) do
-                        if part:IsA("BasePart") then
-                            part.CanCollide = false
-                        end
-                    end
-                end
-            end
-
-            -- click
             for _, target in ipairs(currParts) do
                 local ok, obj = pcall(target.obj)
                 if ok and obj then
