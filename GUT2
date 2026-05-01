@@ -135,7 +135,7 @@ local currParts = {
 local cachedChildren = {}
 local lastRefresh = 0
 local currentIndex = 1
-local REFRESH_RATE = 20
+local REFRESH_RATE = 10
 
 task.spawn(function()
     while true do
