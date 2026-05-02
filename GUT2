@@ -128,61 +128,66 @@ task.spawn(function()
  end)
 
 local currParts = {
-    { obj = function() return workspace.Cube.curr end, isFolder = true },
-    { obj = function() return workspace.dcube end, isFolder = false },
+    { obj = function() return workspace.Cube.curr end, isFolder = true, noRange = false },
+    { obj = function() return workspace end, isFolder = true, noRange = false, filterName = "dcube" },
 }
 
 local cachedChildren = {}
-local lastRefresh = 0
 local currentIndex = 1
+local lastRefresh = 0
 local REFRESH_RATE = 10
 
+local function buildCache()
+    cachedChildren = {}
+    for _, target in ipairs(currParts) do
+        local ok, obj = pcall(target.obj)
+        if ok and obj then
+            if target.isFolder then
+                for _, part in ipairs(obj:GetChildren()) do
+                    if part:IsA("BasePart") and (not target.filterName or part.Name == target.filterName) then
+                        local cd = part:FindFirstChild("ClickDetector")
+                        if cd then table.insert(cachedChildren, { cd = cd, noRange = target.noRange }) end
+                    end
+                end
+            else
+                if obj:IsA("BasePart") then
+                    local cd = obj:FindFirstChild("ClickDetector")
+                    if cd then table.insert(cachedChildren, { cd = cd, noRange = target.noRange }) end
+                end
+            end
+        end
+    end
+    print("Cache built:", #cachedChildren, "entries")
+    currentIndex = 1
+end
+
 task.spawn(function()
+    local wasOn = false
     while true do
         if currLoop then
             local now = tick()
-            if now - lastRefresh >= REFRESH_RATE then
-                cachedChildren = {}
-                for _, target in ipairs(currParts) do
-                    local ok, obj = pcall(target.obj)
-                    if ok and obj then
-                        if target.isFolder then
-                            for _, part in ipairs(obj:GetChildren()) do
-                                if part:IsA("BasePart") then
-                                    local cd = part:FindFirstChild("ClickDetector")
-                                    if cd then table.insert(cachedChildren, cd) end
-                                end
-                            end
-                        else
-                            if obj:IsA("BasePart") then
-                                local cd = obj:FindFirstChild("ClickDetector")
-                                if cd then table.insert(cachedChildren, cd) end
-                            end
-                        end
-                    end
-                end
+            if not wasOn or now - lastRefresh >= REFRESH_RATE then
+                buildCache()
                 lastRefresh = now
-                currentIndex = 1
+                wasOn = true
             end
-
-            if #cachedChildren > 0 then
-                local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                if root then
-                    -- find next nearby one starting from currentIndex
-                    for i = 0, #cachedChildren - 1 do
-                        local idx = (currentIndex + i - 1) % #cachedChildren + 1
-                        local cd = cachedChildren[idx]
-                        if cd and cd.Parent then
-                            local part = cd.Parent
-                            if part:IsA("BasePart") and (part.Position - root.Position).Magnitude <= 30 then
-                                pcall(function() fireclickdetector(cd, 15) end)
-                                currentIndex = idx % #cachedChildren + 1
-                                break
-                            end
+            local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+            if root and #cachedChildren > 0 then
+                for i = 0, #cachedChildren - 1 do
+                    local idx = (currentIndex + i - 1) % #cachedChildren + 1
+                    local entry = cachedChildren[idx]
+                    if entry and entry.cd and entry.cd.Parent then
+                        local part = entry.cd.Parent
+                        if entry.noRange or (part:IsA("BasePart") and (part.Position - root.Position).Magnitude <= 30) then
+                            pcall(function() fireclickdetector(entry.cd, 15) end)
+                            currentIndex = idx % #cachedChildren + 1
+                            break
                         end
                     end
                 end
             end
+        else
+            wasOn = false
         end
         task.wait(0.01)
     end
